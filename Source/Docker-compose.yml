@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+      image: postgres:15
+      environment:
+        POSTGRES_DB: ${POSTGRES_DB:-MessengerDB}
+        POSTGRES_USER: ${POSTGRES_USER:-postgres}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      networks:
+        - messenger-network
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+  messenger.backend:
+    build: ./MessangerBackend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=MessengerDB;Username=postgres;Password=password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - messenger-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Frontend/dist:/usr/share/nginx/html
+      # Опционально для SSL (ща нету)
+      # - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - messenger.backend
+    networks:
+      - messenger-network
+
+volumes:
+  postgres_data:
+
+networks:
+  messenger-network:
+    driver: bridge

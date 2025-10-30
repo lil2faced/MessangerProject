@@ -23,11 +23,22 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
-        "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://0.0.0.0:8080",
+        "ConnectionStrings__DefaultConnection": "Host=postgres;Port=5432;Database=MessengerDB;User Id=postgres;Password=temp;"
       },
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": false
+    },
+    "Docker-Compose": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:8080",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true,
+      "useSSL": false
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"

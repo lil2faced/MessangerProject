@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger - Тестовый клиент</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-title h1 {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-connected {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .status-disconnected {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel h2 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--dark-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .auth-forms {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .users-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .user-item.active {
+            background-color: #e3f2fd;
+        }
+        
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+        }
+        
+        .offline-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #6c757d;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+        
+        .message-sent {
+            align-self: flex-end;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .message-received {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: #333;
+        }
+        
+        .message-info {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+        
+        .typing-indicator {
+            font-style: italic;
+            color: #6c757d;
+            padding: 5px 15px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            gap: 10px;
+        }
+        
+        .chat-input textarea {
+            flex: 1;
+            resize: none;
+            height: 60px;
+        }
+        
+        .logs {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .log-time {
+            color: #6c757d;
+        }
+        
+        .log-success {
+            color: var(--success-color);
+        }
+        
+        .log-error {
+            color: var(--danger-color);
+        }
+        
+        .log-info {
+            color: var(--primary-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="app-title">
+                <h1>🚀 Messenger Test Client</h1>
+                <div id="connection-status" class="status-badge status-disconnected">Disconnected</div>
+            </div>
+            <div class="user-info">
+                <span id="user-display">Not authenticated</span>
+                <button id="logout-btn" class="btn-danger hidden">Logout</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <!-- Аутентификация -->
+                <div class="panel">
+                    <h2>Authentication</h2>
+                    <div class="auth-forms">
+                        <div>
+                            <h3>Register</h3>
+                            <div class="form-group">
+                                <label for="register-name">Name</label>
+                                <input type="text" id="register-name" placeholder="Your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="register-username">Username</label>
+                                <input type="text" id="register-username" placeholder="Unique username">
+                            </div>
+                            <div class="form-group">
+                                <label for="register-password">Password</label>
+                                <input type="password" id="register-password" placeholder="Strong password">
+                            </div>
+                            <button id="register-btn" class="btn-success">Register</button>
+                        </div>
+                        
+                        <div>
+                            <h3>Login</h3>
+                            <div class="form-group">
+                                <label for="login-username">Username</label>
+                                <input type="text" id="login-username" placeholder="Your username">
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">Password</label>
+                                <input type="password" id="login-password" placeholder="Your password">
+                            </div>
+                            <button id="login-btn">Login</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Пользователи -->
+                <div class="panel" id="users-panel">
+                    <h2>Users</h2>
+                    <div class="users-list" id="users-list">
+                        <!-- Users will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Логи -->
+                <div class="panel">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="system-log">System Log</div>
+                        <div class="tab" data-tab="signalr-log">SignalR Log</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="system-log">
+                        <div class="logs" id="system-logs">
+                            <!-- System logs will appear here -->
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="signalr-log">
+                        <div class="logs" id="signalr-logs">
+                            <!-- SignalR logs will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <!-- Чат -->
+                <div class="panel" id="chat-panel">
+                    <h2>Chat</h2>
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <span id="chat-with">Select a user to start chatting</span>
+                            <div id="typing-indicator" class="typing-indicator hidden"></div>
+                        </div>
+                        <div class="chat-messages" id="chat-messages">
+                            <!-- Messages will appear here -->
+                        </div>
+                        <div class="chat-input">
+                            <textarea id="message-input" placeholder="Type your message here..." disabled></textarea>
+                            <button id="send-btn" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Тестирование API -->
+                <div class="panel">
+                    <h2>API Testing</h2>
+                    <div class="form-group">
+                        <button id="test-backend-btn">Test Backend Connection</button>
+                        <button id="test-db-btn">Test Database Connection</button>
+                        <button id="get-users-btn">Get All Users</button>
+                    </div>
+                    <div class="logs" id="api-logs" style="height: 150px;">
+                        <!-- API test results will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация
+        const API_BASE_URL = '/api';
+        const SIGNALR_URL = '/chatHub';
+
+        // Глобальные переменные
+        let currentUser = null;
+        let selectedUser = null;
+        let signalRConnection = null;
+        let typingTimer = null;
+
+        // DOM элементы
+        const connectionStatus = document.getElementById('connection-status');
+        const userDisplay = document.getElementById('user-display');
+        const logoutBtn = document.getElementById('logout-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const usersList = document.getElementById('users-list');
+        const usersPanel = document.getElementById('users-panel');
+        const chatPanel = document.getElementById('chat-panel');
+        const chatWith = document.getElementById('chat-with');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const systemLogs = document.getElementById('system-logs');
+        const signalrLogs = document.getElementById('signalr-logs');
+        const apiLogs = document.getElementById('api-logs');
+        const testBackendBtn = document.getElementById('test-backend-btn');
+        const testDbBtn = document.getElementById('test-db-btn');
+        const getUsersBtn = document.getElementById('get-users-btn');
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, есть ли сохраненный токен
+            const token = localStorage.getItem('jwt_token');
+            if (token) {
+                // Пытаемся восстановить сессию
+                restoreSession(token);
+            } else {
+                updateUIForUnauthenticated();
+            }
+            
+            // Настройка вкладок
+            setupTabs();
+            
+            // Тестирование бэкенда
+            testBackendConnection();
+        });
+
+        // Настройка вкладок
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Убираем активный класс у всех вкладок и контента
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Добавляем активный класс к выбранной вкладке и контенту
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        // Логирование
+        function logSystem(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+            systemLogs.appendChild(logEntry);
+            systemLogs.scrollTop = systemLogs.scrollHeight;
+        }
+
+        function logSignalR(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+            signalrLogs.appendChild(logEntry);
+            signalrLogs.scrollTop = signalrLogs.scrollHeight;
+        }
+
+        function logApi(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+            apiLogs.appendChild(logEntry);
+            apiLogs.scrollTop = apiLogs.scrollHeight;
+        }
+
+        // Восстановление сессии по токену
+        async function restoreSession(token) {
+            try {
+                // Проверяем валидность токена
+                const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentUser = userData;
+                    updateUIForAuthenticated();
+                    connectToSignalR(token);
+                    loadUsers();
+                    logSystem('Session restored successfully', 'success');
+                } else {
+                    localStorage.removeItem('jwt_token');
+                    updateUIForUnauthenticated();
+                    logSystem('Session expired, please login again', 'error');
+                }
+            } catch (error) {
+                localStorage.removeItem('jwt_token');
+                updateUIForUnauthenticated();
+                logSystem(`Error restoring session: ${error.message}`, 'error');
+            }
+        }
+
+        // Регистрация
+        registerBtn.addEventListener('click', async function() {
+            const name = document.getElementById('register-name').value;
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            
+            if (!name || !username || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('jwt_token', data.token);
+                    currentUser = data;
+                    updateUIForAuthenticated();
+                    connectToSignalR(data.token);
+                    loadUsers();
+                    logSystem(`User ${username} registered successfully`, 'success');
+                    
+                    // Очистка формы
+                    document.getElementById('register-name').value = '';
+                    document.getElementById('register-username').value = '';
+                    document.getElementById('register-password').value = '';
+                } else {
+                    logSystem(`Registration failed: ${data.message || 'Unknown error'}`, 'error');
+                    alert(`Registration failed: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                logSystem(`Registration error: ${error.message}`, 'error');
+                alert(`Registration error: ${error.message}`);
+            }
+        });
+
+        // Вход
+        loginBtn.addEventListener('click', async function() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('jwt_token', data.token);
+                    currentUser = data;
+                    updateUIForAuthenticated();
+                    connectToSignalR(data.token);
+                    loadUsers();
+                    logSystem(`User ${username} logged in successfully`, 'success');
+                    
+                    // Очистка формы
+                    document.getElementById('login-username').value = '';
+                    document.getElementById('login-password').value = '';
+                } else {
+                    logSystem(`Login failed: ${data.message || 'Unknown error'}`, 'error');
+                    alert(`Login failed: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                logSystem(`Login error: ${error.message}`, 'error');
+                alert(`Login error: ${error.message}`);
+            }
+        });
+
+        // Выход
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('jwt_token');
+            currentUser = null;
+            selectedUser = null;
+            
+            if (signalRConnection) {
+                signalRConnection.stop();
+                signalRConnection = null;
+            }
+            
+            updateUIForUnauthenticated();
+            logSystem('Logged out successfully', 'info');
+        });
+
+        // Подключение к SignalR
+        async function connectToSignalR(token) {
+            try {
+                // Загружаем SignalR клиент, если еще не загружен
+                if (typeof signalR === 'undefined') {
+                    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js');
+                }
+                
+                // Создаем соединение
+                signalRConnection = new signalR.HubConnectionBuilder()
+                    .withUrl(SIGNALR_URL, {
+                        accessTokenFactory: () => token
+                    })
+                    .withAutomaticReconnect()
+                    .build();
+                
+                // Настройка обработчиков событий
+                signalRConnection.on('ReceiveMessage', (message) => {
+                    logSignalR(`Message received: ${message.body}`, 'info');
+                    displayMessage(message, false);
+                    
+                    // Автоматически отмечаем как прочитанное, если это текущий чат
+                    if (selectedUser && message.senderId === selectedUser.id) {
+                        signalRConnection.invoke('MarkAsRead', message.id)
+                            .then(() => logSignalR(`Message ${message.id} marked as read`, 'info'))
+                            .catch(err => logSignalR(`Error marking message as read: ${err}`, 'error'));
+                    }
+                });
+                
+                signalRConnection.on('MessageSent', (data) => {
+                    logSignalR(`Message sent successfully, ID: ${data.messageId}`, 'success');
+                });
+                
+                signalRConnection.on('MessageRead', (messageId) => {
+                    logSignalR(`Message ${messageId} was read by recipient`, 'info');
+                    updateMessageStatus(messageId, 'read');
+                });
+                
+                signalRConnection.on('UserTyping', (data) => {
+                    if (selectedUser && data.userId === selectedUser.id) {
+                        showTypingIndicator(data.isTyping);
+                    }
+                });
+                
+                signalRConnection.onreconnecting(() => {
+                    connectionStatus.textContent = 'Reconnecting...';
+                    connectionStatus.className = 'status-badge status-disconnected';
+                    logSignalR('SignalR connection lost, reconnecting...', 'warning');
+                });
+                
+                signalRConnection.onreconnected(() => {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'status-badge status-connected';
+                    logSignalR('SignalR connection restored', 'success');
+                });
+                
+                signalRConnection.onclose(() => {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'status-badge status-disconnected';
+                    logSignalR('SignalR connection closed', 'error');
+                });
+                
+                // Запускаем соединение
+                await signalRConnection.start();
+                connectionStatus.textContent = 'Connected';
+                connectionStatus.className = 'status-badge status-connected';
+                logSignalR('SignalR connection established', 'success');
+                
+            } catch (error) {
+                connectionStatus.textContent = 'Connection Failed';
+                connectionStatus.className = 'status-badge status-disconnected';
+                logSignalR(`SignalR connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Загрузка пользователей
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem('jwt_token');
+                const response = await fetch(`${API_BASE_URL}/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    renderUsersList(users);
+                    logApi(`Loaded ${users.length} users`, 'success');
+                } else {
+                    logApi(`Failed to load users: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logApi(`Error loading users: ${error.message}`, 'error');
+            }
+        }
+
+        // Отображение списка пользователей
+        function renderUsersList(users) {
+            usersList.innerHTML = '';
+            
+            users.forEach(user => {
+                if (user.id === currentUser.id) return; // Пропускаем текущего пользователя
+                
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.dataset.userId = user.id;
+                
+                userItem.innerHTML = `
+                    <div>
+                        <strong>${user.name}</strong>
+                        <div>@${user.userName}</div>
+                    </div>
+                    <div class="${user.isOnline ? 'online-indicator' : 'offline-indicator'}"></div>
+                `;
+                
+                userItem.addEventListener('click', () => selectUser(user));
+                usersList.appendChild(userItem);
+            });
+        }
+
+        // Выбор пользователя для чата
+        function selectUser(user) {
+            // Снимаем выделение с предыдущего пользователя
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Выделяем выбранного пользователя
+            document.querySelector(`.user-item[data-user-id="${user.id}"]`).classList.add('active');
+            
+            selectedUser = user;
+            chatWith.textContent = `Chat with ${user.name} (@${user.userName})`;
+            
+            // Очищаем сообщения и загружаем историю
+            chatMessages.innerHTML = '';
+            loadChatHistory(user.id);
+            
+            // Активируем поле ввода
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+
+        // Загрузка истории чата
+        async function loadChatHistory(userId) {
+            try {
+                const token = localStorage.getItem('jwt_token');
+                const response = await fetch(`${API_BASE_URL}/messages/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const messages = await response.json();
+                    messages.forEach(message => {
+                        displayMessage(message, message.senderId === currentUser.id);
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    logApi(`Loaded ${messages.length} messages`, 'success');
+                } else {
+                    logApi(`Failed to load chat history: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logApi(`Error loading chat history: ${error.message}`, 'error');
+            }
+        }
+
+        // Отправка сообщения
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Индикатор набора сообщения
+        messageInput.addEventListener('input', function() {
+            if (!signalRConnection || !selectedUser) return;
+            
+            // Отправляем сигнал о начале набора
+            signalRConnection.invoke('Typing', selectedUser.id, true)
+                .catch(err => console.error('Error sending typing indicator:', err));
+            
+            // Сбрасываем таймер
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                // Отправляем сигнал об окончании набора
+                signalRConnection.invoke('Typing', selectedUser.id, false)
+                    .catch(err => console.error('Error sending typing indicator:', err));
+            }, 1000);
+        });
+
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText || !selectedUser || !signalRConnection) return;
+            
+            try {
+                await signalRConnection.invoke('SendMessage', selectedUser.id, messageText);
+                messageInput.value = '';
+                
+                // Очищаем индикатор набора
+                clearTimeout(typingTimer);
+                signalRConnection.invoke('Typing', selectedUser.id, false)
+                    .catch(err => console.error('Error sending typing indicator:', err));
+                    
+            } catch (error) {
+                logSignalR(`Error sending message: ${error.message}`, 'error');
+                alert(`Error sending message: ${error.message}`);
+            }
+        }
+
+        // Отображение сообщения
+        function displayMessage(message, isSent) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${isSent ? 'message-sent' : 'message-received'}`;
+            messageElement.dataset.messageId = message.id;
+            
+            const time = new Date(message.sendTime).toLocaleTimeString();
+            const status = isSent ? (message.isRead ? '✓✓' : '✓') : '';
+            
+            messageElement.innerHTML = `
+                <div>${message.body}</div>
+                <div class="message-info">${time} ${status}</div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Обновление статуса сообщения
+        function updateMessageStatus(messageId, status) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                const messageInfo = messageElement.querySelector('.message-info');
+                if (status === 'read') {
+                    messageInfo.textContent = messageInfo.textContent.replace('✓', '✓✓');
+                }
+            }
+        }
+
+        // Показать/скрыть индикатор набора
+        function showTypingIndicator(show) {
+            if (show) {
+                typingIndicator.textContent = `${selectedUser.name} is typing...`;
+                typingIndicator.classList.remove('hidden');
+            } else {
+                typingIndicator.classList.add('hidden');
+            }
+        }
+
+        // Обновление UI для аутентифицированного пользователя
+        function updateUIForAuthenticated() {
+            userDisplay.textContent = `${currentUser.name} (@${currentUser.userName})`;
+            logoutBtn.classList.remove('hidden');
+            usersPanel.classList.remove('hidden');
+            chatPanel.classList.remove('hidden');
+        }
+
+        // Обновление UI для неаутентифицированного пользователя
+        function updateUIForUnauthenticated() {
+            userDisplay.textContent = 'Not authenticated';
+            logoutBtn.classList.add('hidden');
+            usersPanel.classList.add('hidden');
+            chatPanel.classList.add('hidden');
+            connectionStatus.textContent = 'Disconnected';
+            connectionStatus.className = 'status-badge status-disconnected';
+            usersList.innerHTML = '';
+            chatMessages.innerHTML = '';
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+        }
+
+        // Тестирование бэкенда
+        testBackendBtn.addEventListener('click', testBackendConnection);
+        
+        async function testBackendConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/test`);
+                if (response.ok) {
+                    const data = await response.json();
+                    logApi(`Backend test: SUCCESS - ${data.message}`, 'success');
+                } else {
+                    logApi(`Backend test: FAILED - HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logApi(`Backend test: ERROR - ${error.message}`, 'error');
+            }
+        }
+
+        testDbBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/test/db`);
+                if (response.ok) {
+                    const data = await response.json();
+                    logApi(`Database test: SUCCESS - ${data.database}`, 'success');
+                } else {
+                    logApi(`Database test: FAILED - HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logApi(`Database test: ERROR - ${error.message}`, 'error');
+            }
+        });
+
+        getUsersBtn.addEventListener('click', async function() {
+            try {
+                const token = localStorage.getItem('jwt_token');
+                if (!token) {
+                    logApi('Please login first to get users', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    logApi(`Got ${users.length} users: ${users.map(u => u.userName).join(', ')}`, 'success');
+                } else {
+                    logApi(`Failed to get users: HTTP ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logApi(`Error getting users: ${error.message}`, 'error');
+            }
+        });
+
+        // Загрузка внешних скриптов
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+    </script>
+</body>
+</html>
